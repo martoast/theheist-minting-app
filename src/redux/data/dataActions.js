@@ -42,7 +42,10 @@ export const fetchData = () => {
       );
     } catch (err) {
       console.log(err);
-      dispatch(fetchDataFailed("Could not load data from contract."));
+      dispatch(fetchDataFailed({
+        visible: true,
+        message: "Could not load data from contract."
+      }));
     }
   };
 };

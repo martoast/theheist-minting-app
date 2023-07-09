@@ -81,13 +81,22 @@ export const connect = () => {
           });
           // Add listeners end
         } else {
-          dispatch(connectFailed(`Change network to ${CONFIG.NETWORK.NAME}.`));
+          dispatch(connectFailed({
+            visible: true,
+            message: `Change network to ${CONFIG.NETWORK.NAME}.`
+          }));
         }
       } catch (err) {
-        dispatch(connectFailed("Something went wrong."));
+        dispatch(connectFailed({
+          visible: true,
+          message: "Something went wrong."
+        }));
       }
     } else {
-      dispatch(connectFailed("Install Metamask."));
+      dispatch(connectFailed({
+        visible: true,
+        message: "Install Metamask."
+      }));
     }
   };
 };

@@ -3,349 +3,542 @@ import { useDispatch, useSelector } from "react-redux";
 import { connect } from "./redux/blockchain/blockchainActions";
 import { fetchData } from "./redux/data/dataActions";
 import * as s from "./styles/globalStyles";
-import styled from "styled-components";
+import {ReactComponent as Meter} from './assets/parking_meter_final_clean.svg';
+import {ReactComponent as MeterWindowBackground} from './assets/meter_window_background_clean.svg';
+import {ReactComponent as Coin} from './assets/coin_final_clean.svg';
+import duck from'./assets/duck.png';
+import feedbackClose from'./assets/export_plus_symbol.png';
 
-const truncate = (input, len) =>
-  input.length > len ? `${input.substring(0, len)}...` : input;
 
-export const StyledButton = styled.button`
-  padding: 10px;
-  border-radius: 50px;
-  border: none;
-  background-color: white;
-  font-weight: bold;
-  color: var(--primary-text);
-  width: 150px;
-  height: 55px;
-  cursor: pointer;
-`;
+const mintActive = true;
 
-export const StyledRoundButton = styled.button`
-  padding: 10px;
-  border-radius: 100%;
-  border: none;
-  background-color: white;
-  padding: 10px;
-  font-weight: bold;
-  font-size: 15px;
-  color: var(--primary-text);
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0px 4px 0px -2px rgba(250, 250, 250, 0.3);
-  -webkit-box-shadow: 0px 4px 0px -2px rgba(250, 250, 250, 0.3);
-  -moz-box-shadow: 0px 4px 0px -2px rgba(250, 250, 250, 0.3);
-  :active {
-    box-shadow: none;
-    -webkit-box-shadow: none;
-    -moz-box-shadow: none;
-  }
-`;
+function AccessabilityContainer(props){
+    return(
+        <main>
+            <h1 id="mint_status_html">Mint is </h1>
+            <p id="mint_cost_html">This mint costs ETH.</p>
+            <p id="remaining_supply_html">{data.totalSupply} out of {CONFIG.MAX_SUPPLY} NFT's remain from this mint.</p>
+            <p id="mint_amount">Mint NFT's</p>
+            <button 
+                id="connect_button_html" 
+                onClick={(e) => {
+                    e.preventDefault();
+                    dispatch(connect());
+                    getData();
+                    }}
+            >
+                Connect your wallet
+            </button>
 
-export const ResponsiveWrapper = styled.div`
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  justify-content: stretched;
-  align-items: stretched;
-  width: 100%;
-  @media (min-width: 767px) {
-    flex-direction: row;
-  }
-`;
+            <button 
+                id="less_button_html"
+                disabled={claimingNft ? 1 : 0}
+                onClick={(e) => {
+                    e.preventDefault();
+                    decrementMintAmount();
+                }}
+            >
+                one less
+            </button>
 
-export const StyledLogo = styled.img`
-  width: 200px;
-  @media (min-width: 767px) {
-    width: 300px;
-  }
-  transition: width 0.5s;
-  transition: height 0.5s;
-`;
+            <button 
+                disabled={claimingNft ? 1 : 0}
+                id="more_button_html" onClick={(e) => {
+                    e.preventDefault();
+                    incrementMintAmount();
+                }}
+            >
+                one more
+            </button>
+            <button 
+                id="mint_button_html"
+                disabled={claimingNft ? 1 : 0}
+                onClick={(e) => {
+                    claimNFTs();
+                    getData();
+                }}
+            >
+                Mint
+            </button>
+        </main>
+    )
+}
 
-export const StyledImg = styled.img`
-  border-radius: 15%;
-  width: 200px;
-  @media (min-width: 900px) {
-    width: 250px;
-  }
-  @media (min-width: 1000px) {
-    width: 430px;
-  }
-  transition: width 0.5s;
-`;
+function NumbersContainer(props){
+    let {meterNumbers} = props;
+    return(
+        <div id="numbers_container">
+            <span className={meterNumbers[0].classes} data-position={meterNumbers[0].position}>{meterNumbers[0].value}</span>
+            <span className={meterNumbers[1].classes} data-position={meterNumbers[1].position}>{meterNumbers[1].value}</span>
+            <span className={meterNumbers[2].classes} data-position={meterNumbers[2].position}>{meterNumbers[2].value}</span>
+        </div>
+    )
+}
 
-export const StyledLink = styled.a`
-  color: white;
-  text-decoration: none;
-`;
+class MeterContainer extends React.Component{
+    componentDidMount(){
 
-function App() {
-  const dispatch = useDispatch();
-  const blockchain = useSelector((state) => state.blockchain);
-  const data = useSelector((state) => state.data);
-  const [claimingNft, setClaimingNft] = useState(false);
-  const [feedback, setFeedback] = useState(`Click buy to mint NFT.`);
-  const [mintAmount, setMintAmount] = useState(1);
-  const [CONFIG, SET_CONFIG] = useState({
+        let {
+            toggleStickers,
+            costSvgText,
+            mintRemainingText
+        } = this.props;
+
+        const svg = document.querySelector('#meter_svg');
+
+        const meterStickers = Array.from(
+                svg.querySelectorAll('.sticker')
+            );
+
+        mintRemainingText.current =  svg.querySelector('#quantity_left_svg')
+
+
+        toggleStickers.current = mintAmount =>{
+
+            const to = mintAmount
+    
+            const visible = meterStickers.slice(0, to)
+            const hidden = meterStickers.slice(to)
+    
+            visible.forEach(sticker => sticker.style.visibility = 'visible');
+            hidden.forEach(sticker => sticker.style.visibility = 'hidden');
+        }
+
+        toggleStickers.current(0);
+
+
+        costSvgText.current = svg.querySelector('#total_cost_svg_text')
+
+        
+        const plusButtonHTML = document.querySelector('#more_button_html')
+        const mintButtonHTML = document.querySelector('#mint_button_html')
+        const lessButtonHTML = document.querySelector('#less_button_html')
+        const connectButtonHTML = document.querySelector('#connect_button_html')
+
+        svg.querySelector('#plus_button').addEventListener('click', () => plusButtonHTML.click());
+        svg.querySelector('#minus_button').addEventListener('click', () => lessButtonHTML.click());
+        svg.querySelector('#press_to_mint').addEventListener('click', () => mintButtonHTML.click());
+        document.querySelector('#coin_svg>.base').addEventListener('click', () => connectButtonHTML.click())
+
+        document.querySelector('#loading_container').dataset.rendered = "true"
+    }
+
+    componentDidUpdate(prevProps){
+        if(this.props.mintRemainingTextValue != prevProps.mintRemainingTextValue)
+            this.props.mintRemainingText.current.textContent = this.props.mintRemainingTextValue;
+    }
+
+    render(){
+        return(
+            <section id="meter_container">
+                <MeterWindowBackground></MeterWindowBackground>
+                <NumbersContainer meterNumbers={this.props.meterNumbers}></NumbersContainer>
+                <Meter mint-open={this.props.mintOpen} wallet-connected={this.props.walletConnected}></Meter>
+                <Coin data-coin-shake={this.props.coinShake} onAnimationEnd={this.props.resetCoin}></Coin>
+            </section>
+        )
+    }
+}
+
+class FeedbackOverlay extends React.Component{
+
+    componentDidUpdate(prevProps){
+        if(prevProps.feedback != this.props.feedback)
+            this.processMessage(this.props.feedback)
+
+        if(prevProps.err != this.props.err)
+            this.processMessage(this.props.err)
+        
+    }
+
+    processMessage (messageObj){
+        if(!messageObj.visible)
+            return
+
+        this.setState({
+            ...this.state,
+            visible: true,
+            message: messageObj.message
+        })
+
+        console.log('hi')
+    }
+
+    state = {
+        visible: false,
+        message: ''
+    }
+
+    getMessage = () => this.state.message
+    getVisible = () => this.state.visible
+
+    render(){
+        return(
+            <div id="feedback_overlay" data-visible={this.getVisible()}>
+                <div id="feedback_container">
+                    <img src={duck} id="duck" />
+                    <p id="feedback_text">{this.getMessage()}</p>
+                    <img src={feedbackClose} id="feedback_close"  onClick={(e) => {
+                        e.preventDefault();
+                        this.setState({...this.state, visible: false})
+                    }}/>
+                </div>     
+            </div>
+        )
+    }
+}
+
+function App(){
+
+    const dispatch = useDispatch();
+    const blockchain = useSelector((state) => state.blockchain);
+    const data = useSelector((state) => state.data);
+    const [claimingNft, setClaimingNft] = useState(false);
+    const [feedback, setFeedback] = useState({
+        visible: false,
+        message: `Click buy to mint your NFT.`
+    });
+    const [mintAmount, setMintAmount] = useState(0);
+    const mintAmountRef = useRef(mintAmount);
+    const [CONFIG, SET_CONFIG] = useState({
     CONTRACT_ADDRESS: "",
     SCAN_LINK: "",
     NETWORK: {
-      NAME: "",
-      SYMBOL: "",
-      ID: 0,
+        NAME: "",
+        SYMBOL: "",
+        ID: 0,
     },
     NFT_NAME: "",
     SYMBOL: "",
-    MAX_SUPPLY: 1,
+    MAX_SUPPLY: 1000,
     WEI_COST: 0,
     DISPLAY_COST: 0,
     GAS_LIMIT: 0,
     MARKETPLACE: "",
     MARKETPLACE_LINK: "",
     SHOW_BACKGROUND: false,
-  });
+    });
 
-  const claimNFTs = () => {
-    let cost = CONFIG.WEI_COST;
-    let gasLimit = CONFIG.GAS_LIMIT;
-    let totalCostWei = String(cost * mintAmount);
-    let totalGasLimit = String(gasLimit * mintAmount);
-    console.log("Cost: ", totalCostWei);
-    console.log("Gas limit: ", totalGasLimit);
-    setFeedback(`Minting in progress...`);
-    setClaimingNft(true);
-    blockchain.smartContract.methods
-      .mint(mintAmount)
-      .send({
-        gasLimit: String(totalGasLimit),
-        to: CONFIG.CONTRACT_ADDRESS,
-        from: blockchain.account,
-        value: totalCostWei,
-      })
-      .once("error", (err) => {
-        console.log(err);
-        setFeedback("Sorry, something went wrong please try again later.");
-        setClaimingNft(false);
-      })
-      .then((receipt) => {
-        console.log(receipt);
-        setFeedback(
-          `Successfully minted token. Visit Opensea.io to view it!`
-        );
-        setClaimingNft(false);
-        dispatch(fetchData(blockchain.account));
-      });
-  };
+    const claimNFTs = () => {
+        if(!mintActive)
+            return setFeedback({
+                visible: false,
+                message: 'mint is closed'
+            })
 
-  const decrementMintAmount = () => {
-    let newMintAmount = mintAmount - 1;
-    if (newMintAmount < 1) {
-      newMintAmount = 1;
-    }
-    setMintAmount(newMintAmount);
-  };
+        if(blockchain.account === "" || blockchain.smartContract === null)
+            return shakeCoin();
 
-  const incrementMintAmount = () => {
-    let newMintAmount = mintAmount + 1;
-    if (newMintAmount > 10) {
-      newMintAmount = 10;
-    }
-    setMintAmount(newMintAmount);
-  };
+        let cost = CONFIG.WEI_COST;
+        let gasLimit = CONFIG.GAS_LIMIT;
+        let totalCostWei = String(cost * mintAmount);
+        let totalGasLimit = String(gasLimit * mintAmount);
+        setFeedback({
+            visible: true,
+            message: `Minting your ${CONFIG.NFT_NAME}...`
+        });
+        setClaimingNft(true);
+        blockchain.smartContract.methods
+            .mint(mintAmount)
+            .send({
+            gasLimit: String(totalGasLimit),
+            to: CONFIG.CONTRACT_ADDRESS,
+            from: blockchain.account,
+            value: totalCostWei,
+            })
+            .once("error", (err) => {
+            console.log(err);
+            setFeedback({
+                visible: true,
+                message:"Sorry, something went wrong please try again later."
+            });
+            setClaimingNft(false);
+            })
+            .then((receipt) => {
+            console.log(receipt);
+            setFeedback({
+                visible: true,
+                message: `WOW, the ${CONFIG.NFT_NAME} is yours! go visit Opensea.io to view it.`
+            });
+            setClaimingNft(false);
+            dispatch(fetchData(blockchain.account));
+        });
+    };
 
-  const getData = () => {
+    // const decrementMintAmount = () => {
+    // let newMintAmount = mintAmount - 1;
+    // if (newMintAmount < 1) {
+    //     newMintAmount = 1;
+    // }
+    // setMintAmount(newMintAmount);
+    // };
+
+    // const incrementMintAmount = () => {
+    // let newMintAmount = mintAmount + 1;
+    // if (newMintAmount > 10) {
+    //     newMintAmount = 10;
+    // }
+    // setMintAmount(newMintAmount);
+    // };
+
+    const getData = () => {
     if (blockchain.account !== "" && blockchain.smartContract !== null) {
-      dispatch(fetchData(blockchain.account));
+        dispatch(fetchData(blockchain.account));
     }
-  };
+    };
 
-  const getConfig = async () => {
+    const getConfig = async () => {
     const configResponse = await fetch("/config/config.json", {
-      headers: {
+        headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-      },
+        },
     });
     const config = await configResponse.json();
     SET_CONFIG(config);
-  };
+    };
 
-  useEffect(() => {
+    useEffect(() => {
     getConfig();
-  }, []);
+    }, []);
 
-  useEffect(() => {
+    useEffect(() => {
     getData();
-  }, [blockchain.account]);
+    }, [blockchain.account]);
 
-  return (
-    <s.Screen>
-      <s.Container
-        flex={1}
-        ai={"center"}
-        style={{ padding: 24, backgroundColor: "black" }}
-       
-      >
-        <StyledLogo alt={"logo"} src={"/config/images/logo.png"} />
-        <s.SpacerSmall />
-        <s.TextDescription
-              style={{
-                textAlign: "center",
-                color: "white",
-              }}
-            >
-              <StyledLink target={"_blank"} href={CONFIG.SCAN_LINK}>
-                {truncate(CONFIG.CONTRACT_ADDRESS, 15)}
-              </StyledLink>
-        </s.TextDescription>
-        <ResponsiveWrapper flex={1} style={{ padding: 24 }} test>       
-          <s.Container
-            flex={1}
-            jc={"center"}
-            ai={"center"}
-            
-          >
-            <StyledImg alt={"example"} src={"/config/images/example.gif"} />
-            <s.SpacerSmall />
+    const [meterNumbers, setMeterNumbers] = useState([
+        {
+            position: 'left',
+            classes: 'number',
+            value: 0
+        },
+        {
+            position: 'center',
+            classes: 'number',
+            value: 0
+        },
+        {
+            position: 'right',
+            classes: 'number',
+            value: 0
+        }
+    ]);
 
-            <s.TextTitle style={{ textAlign: "center", color: "var(--accent-text)" }}>
-                  Sale Closed
-            </s.TextTitle>
+    const toggleStickers = useRef(undefined);
+    const costSvgText = useRef(undefined);
+    const mintRemainingText = useRef(undefined);
 
-            <s.TextTitle
-              style={{
-                textAlign: "center",
-                fontSize: 35,
-                fontWeight: "bold",
-                color: "var(--accent-text)",
-              }}
-            >
-              {/* {data.totalSupply} / {CONFIG.MAX_SUPPLY} */}
-              2,073 / 10,000
-            </s.TextTitle>
-            
-            <s.SpacerSmall />
-            {Number(data.totalSupply) >= CONFIG.MAX_SUPPLY ? (
-              <>
-                <s.TextTitle
-                  style={{ textAlign: "center", color: "var(--accent-text)" }}
-                >
-                  The sale has ended.
-                </s.TextTitle>
-                <s.TextDescription
-                  style={{ textAlign: "center", color: "var(--accent-text)" }}
-                >
-                  You can still find {CONFIG.NFT_NAME} on
-                </s.TextDescription>
-                <s.SpacerSmall />
-                <StyledLink target={"_blank"} href={CONFIG.MARKETPLACE_LINK}>
-                  {CONFIG.MARKETPLACE}
-                </StyledLink>
-              </>
-            ) : (
-              <>
-                {blockchain.account === "" ||
-                blockchain.smartContract === null ? (
-                  <s.Container ai={"center"} jc={"center"}>
-                    {/* <StyledButton
-                      onClick={(e) => {
+    // const incrementMintAmount = () => {
+
+    //     if(mintAmountRef.current === 10)
+    //         return false;
+        
+    //     mintAmountRef.current += 1;
+
+    //     setMintAmount(mintAmountRef.current);
+
+    //     return true
+    // };
+
+    const incrementMintAmount = () => {
+
+        if(mintAmount === 10)
+            return false;
+
+        setMintAmount(mintAmount + 1);
+
+        return true
+    };
+
+    // const decrementMintAmount = () => {
+    
+    //     if(mintAmountRef.current === 0)
+    //         return false;
+        
+    //     mintAmountRef.current -= 1;
+
+    //     setMintAmount(mintAmountRef.current);
+
+    //     return true
+    // };
+
+    const decrementMintAmount = () => {
+    
+        if(mintAmount === 0)
+            return false;
+
+        setMintAmount(mintAmount -1);
+
+        return true
+    };
+
+    function meterNumberUp(){
+
+        setMeterNumbers(
+            meterNumbers.map(numberEleData => {
+                const assignments = {
+                    left: {
+                        position: 'right',
+                        classes: 'number',
+                    },
+                    center: {
+                        position: 'left',
+                        classes: 'number transition',
+                    },
+                    right: {
+                        position: 'center',
+                        classes: 'number transition',
+                        value: mintAmount + 1
+                    }
+                }
+    
+                const newData = Object.assign(numberEleData, assignments[numberEleData.position])
+    
+                return newData
+            })
+        )
+
+        toggleStickers.current(mintAmount + 1)
+
+        costSvgText.current.textContent = (CONFIG.DISPLAY_COST * (mintAmount + 1)).toFixed(2)
+    }
+    
+    function meterNumberDown(){
+    
+        setMeterNumbers(
+            meterNumbers.map(numberEleData => {
+                const assignments = {
+                    left: {
+                        position: 'center',
+                        classes: 'number transition',
+                        value: mintAmount - 1
+                    },
+                    center: {
+                        position: 'right',
+                        classes: 'number transition',
+                    },
+                    right: {
+                        position: 'left',
+                        classes: 'number',
+                    }
+                }
+    
+                const newData = Object.assign(numberEleData, assignments[numberEleData.position])
+                return newData
+            })
+        )
+
+        toggleStickers.current(mintAmount - 1)
+
+        costSvgText.current.textContent = (CONFIG.DISPLAY_COST * (mintAmount - 1)).toFixed(2)
+    }
+
+    function meterUpFunction(){
+        if(incrementMintAmount()){
+            meterNumberUp();
+        }         
+    }
+    
+    function meterDownFunction(){
+        if(decrementMintAmount()){
+            meterNumberDown();
+        }  
+    }
+
+    const [coinShake, setCoinShake] = useState(false)
+
+    function shakeCoin(){
+        setCoinShake(true)
+    }
+
+    function resetCoin(){
+        setCoinShake(false)
+    }
+
+    return (
+        <>
+            {/* <img src={background} id="background"/> */}
+            <main id="accessibility_container" data-production="true">
+                <h1 id="mint_status_html">Mint is {Number(data.totalSupply) >= CONFIG.MAX_SUPPLY ? 'Closed' : 'Open'}</h1>
+                <p id="mint_cost_html">This mint costs {CONFIG.DISPLAY_COST * mintAmount} ETH.</p>
+                <p id="remaining_supply_html">{data.totalSupply} out of {CONFIG.MAX_SUPPLY} NFT's have been minted.</p>
+                <p id="mint_amount">Mint {mintAmount} NFT's</p>
+                <button 
+                    id="connect_button_html" 
+                    onClick={(e)=>{
                         e.preventDefault();
                         dispatch(connect());
                         getData();
-                      }}
-                    >
-                      CONNECT WALLET
-                    </StyledButton> */}
-                    <StyledButton>
-                      SALE CLOSED
-                    </StyledButton>
-                    {blockchain.errorMsg !== "" ? (
-                      <>
-                        <s.SpacerSmall />
-                        <s.TextDescription
-                          style={{
-                            textAlign: "center",
-                            color: "var(--accent-text)",
-                          }}
-                        >
-                          {blockchain.errorMsg}
-                        </s.TextDescription>
-                      </>
-                    ) : null}
-                  </s.Container>
-                ) : (
-                  <>
-                    <s.TextDescription
-                      style={{
-                        textAlign: "center",
-                        color: "var(--accent-text)",
-                      }}
-                    >
-                      {feedback}
-                    </s.TextDescription>
-                    <s.SpacerMedium />
-                    <s.Container ai={"center"} jc={"center"} fd={"row"}>
-                      <StyledRoundButton
-                        style={{ lineHeight: 0.4 }}
-                        disabled={claimingNft ? 1 : 0}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          decrementMintAmount();
-                        }}
-                      >
-                        -
-                      </StyledRoundButton>
-                      <s.SpacerMedium />
-                      <s.TextDescription
-                        style={{
-                          textAlign: "center",
-                          color: "var(--accent-text)",
-                        }}
-                      >
-                        {mintAmount}
-                      </s.TextDescription>
-                      <s.SpacerMedium />
-                      <StyledRoundButton
-                        disabled={claimingNft ? 1 : 0}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          incrementMintAmount();
-                        }}
-                      >
-                        +
-                      </StyledRoundButton>
-                    </s.Container>
-                    <s.SpacerSmall />
-                    <s.Container ai={"center"} jc={"center"} fd={"row"}>
-                      <StyledButton
-                        disabled={claimingNft ? 1 : 0}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          claimNFTs();
-                          getData();
-                        }}
-                      >
-                        {claimingNft ? "BUSY" : "BUY"}
-                      </StyledButton>
-                    </s.Container>
-                  </>
-                )}
-              </>
-            )}
-            <s.SpacerMedium />
-          </s.Container>
-          <s.SpacerLarge />
-          
-        </ResponsiveWrapper>
-        <s.SpacerMedium />
-        
-      </s.Container>
-    </s.Screen>
-  );
+
+                        // mintRemainingText.current.textContent = `${data.totalSupply} / ${CONFIG.MAX_SUPPLY}`
+                    }}
+                >
+                    Connect your wallet
+                </button>
+
+                <button 
+                    id="less_button_html"
+                    disabled={claimingNft ? 1 : 0}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        meterDownFunction();
+                    }}
+                >
+                    one less
+                </button>
+
+                <button 
+                    disabled={claimingNft ? 1 : 0}
+                    id="more_button_html" onClick={(e) => {
+                        e.preventDefault();
+                        meterUpFunction();
+                    }}
+                >
+                    one more
+                </button>
+                <button 
+                    id="mint_button_html"
+                    disabled={claimingNft ? 1 : 0}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        claimNFTs();
+                        getData();
+                    }}
+                >
+                    Mint
+                </button>
+                <br/>
+                <span>feedback: {feedback.message}</span><br/>
+                <span>errmsg: {blockchain.errorMsg.message}</span>
+            </main>
+            <div id="offset_container">
+                <MeterContainer
+                    coinShake = {coinShake}
+                    resetCoin = {resetCoin}
+
+                    toggleStickers = {toggleStickers}
+
+                    costSvgText = {costSvgText}
+
+                    mintRemainingText = {mintRemainingText}
+
+                    mintOpen = {(!(Number(data.totalSupply) >= CONFIG.MAX_SUPPLY) && mintActive).toString()}
+
+                    mintRemainingTextValue = {`${data.totalSupply} / ${CONFIG.MAX_SUPPLY}`}
+
+                    walletConnected = {(!(blockchain.account === "" || blockchain.smartContract === null)).toString()}
+
+                    meterNumbers = {meterNumbers}
+                ></MeterContainer>
+            </div>
+            <FeedbackOverlay 
+                feedback={feedback} 
+                err={blockchain.errorMsg}
+                message
+                visible
+            ></FeedbackOverlay>
+        </>
+    );
 }
 
 export default App;

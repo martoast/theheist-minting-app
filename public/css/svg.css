@@ -1,0 +1,400 @@
+html, body{
+    overflow: hidden;
+}
+
+body{
+    background: url("/assets/background.png") no-repeat;
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+}
+
+#offset_container{
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+
+    width: 100%;
+    max-width: 800px;
+    height: 100%;
+}
+
+#meter_container{
+    position: relative;
+
+    display: flex;
+    align-items: flex-end;
+
+    width: auto;
+    max-height: 800px;
+    height: 90%;
+    max-height: 100%;
+    min-height: 0px;
+    
+    isolation: isolate;
+}
+
+#meter_window_background{
+    position: absolute;
+    bottom:0;
+
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+
+    backface-visibility: hidden;
+
+    z-index: -1;
+}
+
+#meter_svg{
+    height: 100%;
+    max-width: 100%;
+
+    object-fit: contain;
+}
+
+#coin_svg > *,
+#meter_svg > *{
+    backface-visibility: hidden;
+    pointer-events: none;
+}
+
+#meter_svg[mint-open="true"] > #mint_closed{
+    visibility: hidden;
+}
+
+#numbers_container{
+    position: absolute;
+
+    inset: 0;
+
+    z-index: -1;
+}
+
+#numbers_container > * {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+
+    height: 39.95%;
+
+    font-size: 2.45rem;
+    font-weight: 700;
+    color: red;
+    font-family: sans-serif;
+    text-align: center;
+
+    transform: translateX(-50%) rotate(.4deg);
+    transform-origin: bottom center;
+}
+
+#numbers_container> [data-position="left"]{
+    transform: translateX(-50%) rotate(-30deg);
+}
+
+#numbers_container> [data-position="right"]{
+    transform: translateX(-50%) rotate(30deg);
+}
+
+#numbers_container> .number.transition{
+    transition: .25s;
+}
+
+#coin_svg .base,
+#meter_svg #plus_button,
+#meter_svg #minus_button,
+#meter_svg #press_to_mint{
+    pointer-events: all;
+}
+
+#coin_svg .base:hover,
+#meter_svg #plus_button:hover,
+#meter_svg #minus_button:hover,
+#meter_svg #press_to_mint:hover{
+    cursor: pointer;
+}
+
+#press_to_mint{
+    transform-origin: center 25%;
+}
+
+#plus_button{
+    transform-origin: center 42%;
+
+}
+
+#minus_button{
+    transform-origin: center 55%;
+}
+
+#meter_svg[wallet-connected="true"] > #press_to_mint:active,
+#minus_button:active,
+#plus_button:active{
+    transform: scale(.96);
+}
+
+/* #minus_button:active{
+    transform: scale(.96);
+} */
+
+#meter_svg[wallet-connected="true"] > #press_to_mint > .shadow,
+#plus_button > .shadow,
+#minus_button > .shadow{
+    visibility: hidden;
+}
+
+#meter_svg[wallet-connected="true"] > #press_to_mint:active > .shadow,
+#plus_button:active > .shadow,
+#minus_button:active > .shadow{
+    visibility: visible;
+}
+
+#coin_svg{
+    position: absolute;
+    top: 45%;
+    right: calc(0px - 60px);
+
+    width: 115px;
+
+    transform-origin: center;
+}
+
+#coin_svg:active{
+    transform: scale(1.1) rotate(3deg);
+}
+
+@keyframes coin_shake{
+    0%{
+        transform: scale(1) rotate(0);
+    }
+    20%{
+        transform: scale(1.1) rotate(-10deg);
+    }
+    40%{
+        transform: scale(1.2) rotate(15deg);
+    }
+    60%{
+        transform: scale(1.3) rotate(-15deg);
+    }
+    80%{
+        transform: scale(1.2) rotate(10deg);
+    }
+    100%{
+        transform: scale(1) rotate(0);
+    }
+}
+
+#coin_svg[data-coin-shake="true"]{
+    animation-name: coin_shake;
+    animation-duration: .5s;
+    animation-timing-function: ease-in;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+}
+
+#loading_container{
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    justify-content: center;
+    place-items: center;
+
+    height: 100%;
+
+    background: #8b0000;
+    /* background-image: radial-gradient(rgb(120, 0, 0) 30%, rgb(140, 0, 0)); */
+
+    transform-origin: center;
+}
+
+@keyframes loading_complete{
+    0%{
+        opacity: 1;
+        transform: scale(1)
+    }
+    99%{
+        opacity: 0;
+        transform: scale(1.2)
+    }
+    100%{
+        opacity: 0;
+        transform: scale(1.2);
+        display: none;
+    }
+}
+
+#loading_container[data-rendered="true"]{
+    animation-name: loading_complete;
+    animation-duration: .5s;
+    animation-delay: 4s;
+    animation-timing-function: ease-in;
+    animation-fill-mode: forwards;
+    animation-iteration-count: 1;
+
+    pointer-events: none;
+}
+
+#loading_svg{
+    width: 100%;
+    height: auto;
+
+    max-width: 500px;
+    max-height: 90%;
+
+}
+
+@keyframes loading_animation{
+    0% {opacity: 0}
+    100% {opacity: 1}
+}
+
+#loading_rect{
+      height: 100%;
+      /* transform-origin: top center;
+      
+      transform-box: fill-box; */
+      
+      /* transition: height .25s; */
+
+      animation-name: loading_animation;
+      animation-duration: 5s;
+      animation-timing-function: ease;
+      animation-fill-mode: forwards;
+      animation-iteration-count: 1;
+
+      /* opacity: .05; */
+ }
+
+ #accessibility_container[data-production="true"],
+ #accessibility_container[data-production="true"] > *{
+    outline: none;
+    border: none;
+
+    width: 0px;
+    height: 0px;
+
+    font-size: 0rem;
+
+    color: transparent;
+    background: transparent;
+ }
+
+ #feedback_overlay{
+    position: fixed;
+    
+    inset: 0;
+
+    display: grid;
+    place-items: center;
+
+    width: 100%;
+    height: 100%;
+
+    background: rgba(0,0,0,.5)
+ }
+
+ 
+ #feedback_overlay[data-visible="false"]{
+    visibility: hidden;
+    pointer-events: none;
+ }
+
+ #feedback_container{
+    position: relative;
+
+    width: 90%;
+    max-width: 457px;
+    height: 90%;
+    max-height: 465px;
+ }
+
+ #feedback_container > #duck{
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+ }
+
+ #feedback_container > p{
+    position: absolute;
+    inset: 55% 15% 5% 20%;
+
+    display: grid;
+    place-items: center;
+
+    text-align: center;
+
+    /* background: orange; */
+
+    font-size: 1.75rem;
+    text-transform: uppercase;
+    color: white;
+    font-weight: 700;
+    line-height: 2rem;
+ }
+
+ @keyframes feedback_twist{
+    from{
+        transform: rotate(-20deg) translate(-15px, 15px);
+    }
+
+    to{
+        transform: rotate(5deg) translate(5px, 10px);
+    }
+ }
+
+ #feedback_close{
+    position: absolute; 
+    top:0; 
+    right: 0; 
+     
+    width: 40px; 
+    height: 40px; 
+
+    transform: rotate(45deg);
+    transform-origin: center;
+ }
+
+ #feedback_close:hover{
+    cursor: pointer ;
+    pointer-events: all;
+ }
+
+ #feedback_overlay[data-visible="true"] > #feedback_container > img#duck{
+    animation-name: feedback_twist;
+    animation-duration: .25s;
+    animation-timing-function: steps(1);
+    animation-fill-mode: forwards;
+    animation-delay: 0s;
+
+    transform-origin: center;
+ }
+
+ @media (max-width: 400px) {
+    #numbers_container > *{
+        font-size: 2.15rem;
+    }
+  }
+
+   @media (max-width: 350px) {
+    #numbers_container > *{
+        font-size: 1.9rem;
+    }
+  }
+
+  @media (max-width: 920px) {
+    #coin_svg{
+        position: fixed;
+        top: auto;
+        right: 20px;
+        bottom: 20px;
+        width: 115px;
+    }
+  }
