@@ -10,7 +10,7 @@ import duck from'./assets/duck.png';
 import feedbackClose from'./assets/export_plus_symbol.png';
 
 
-const mintActive = true;
+const mintActive = false;
 
 function AccessabilityContainer(props){
     return(
