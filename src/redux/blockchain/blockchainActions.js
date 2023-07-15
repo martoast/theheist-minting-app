@@ -83,18 +83,21 @@ export const connect = () => {
         } else {
           dispatch(connectFailed({
             visible: true,
+            closable: true,
             message: `Change network to ${CONFIG.NETWORK.NAME}.`
           }));
         }
       } catch (err) {
         dispatch(connectFailed({
           visible: true,
+          closable: true,
           message: "Something went wrong."
         }));
       }
     } else {
       dispatch(connectFailed({
         visible: true,
+        closable: true,
         message: "Install Metamask."
       }));
     }

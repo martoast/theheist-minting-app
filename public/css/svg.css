@@ -1,12 +1,17 @@
+@font-face {
+    font-family: 'Heistish';
+    src: url('/assets/WordOfGod.otf');
+}
+
 html, body{
     overflow: hidden;
 }
 
 body{
-    background: url("/assets/background.png") no-repeat;
+    background-image: url("/assets/background.png");
     background-size: cover;
     background-position: center;
-    height: 100vh;
+    font-family: 'Heistish', sans-serif;
 }
 
 #offset_container{
@@ -19,9 +24,10 @@ body{
     justify-content: flex-end;
     align-items: flex-end;
 
-    width: 100%;
-    max-width: 800px;
+    width: 40vw;
+    max-width: 750px;
     height: 100%;
+    max-height: 840px;
 }
 
 #meter_container{
@@ -31,8 +37,9 @@ body{
     align-items: flex-end;
 
     width: auto;
-    max-height: 800px;
-    height: 90%;
+    width: 100%;
+    max-width: 430px;
+    height: 100%;
     max-height: 100%;
     min-height: 0px;
     
@@ -53,8 +60,12 @@ body{
 }
 
 #meter_svg{
-    height: 100%;
-    max-width: 100%;
+    width: 100%;
+    height: auto;
+    max-height: 100%;
+
+    min-width: 0;
+    min-height: 0;
 
     object-fit: contain;
 }
@@ -73,6 +84,7 @@ body{
     position: absolute;
 
     inset: 0;
+    top: auto;
 
     z-index: -1;
 }
@@ -106,6 +118,7 @@ body{
     transition: .25s;
 }
 
+#contract_link,
 #coin_svg .base,
 #meter_svg #plus_button,
 #meter_svg #minus_button,
@@ -155,12 +168,20 @@ body{
     visibility: visible;
 }
 
+#contract_link{
+    width: 20ch;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 #coin_svg{
     position: absolute;
     top: 45%;
     right: calc(0px - 60px);
 
-    width: 115px;
+    width: 25%;
+    aspect-ratio: 1;
 
     transform-origin: center;
 }
@@ -309,9 +330,9 @@ body{
  #feedback_container{
     position: relative;
 
-    width: 90%;
+    width: 80%;
     max-width: 457px;
-    height: 90%;
+    height: 80%;
     max-height: 465px;
  }
 
@@ -338,6 +359,7 @@ body{
     color: white;
     font-weight: 700;
     line-height: 2rem;
+    font-family: 'Heistish', sans-serif;
  }
 
  @keyframes feedback_twist{
@@ -347,6 +369,20 @@ body{
 
     to{
         transform: rotate(5deg) translate(5px, 10px);
+    }
+ }
+
+ @keyframes feedback_dance{
+    0%{
+        transform: rotate(-10deg) translate(5px, 10px);
+    }
+
+    50%{
+        transform: rotate(10deg) translate(5px, 10px);
+    }
+
+    100%{
+        transform: rotate(-10deg) translate(5px, 10px);
     }
  }
 
@@ -367,12 +403,26 @@ body{
     pointer-events: all;
  }
 
- #feedback_overlay[data-visible="true"] > #feedback_container > img#duck{
+ #feedback_close[data-closable="false"]{
+    display: none;
+ }
+
+ #feedback_overlay[data-visible="true"] > #feedback_container{
     animation-name: feedback_twist;
     animation-duration: .25s;
     animation-timing-function: steps(1);
     animation-fill-mode: forwards;
     animation-delay: 0s;
+
+    transform-origin: center;
+ }
+
+ #feedback_overlay[data-visible="minting"] > #feedback_container{
+    animation-name: feedback_dance;
+    animation-duration: 1.5s;
+    animation-timing-function: steps(1);
+    animation-delay: 0s;
+    animation-iteration-count: infinite;
 
     transform-origin: center;
  }
@@ -383,18 +433,48 @@ body{
     }
   }
 
-   @media (max-width: 350px) {
+  @media (max-height: 900px) {
+    #numbers_container > *{
+        font-size: 2.15rem;
+    }
+  }
+
+   @media (max-width: 350px) and (max-height: 800px){
     #numbers_container > *{
         font-size: 1.9rem;
     }
   }
 
-  @media (max-width: 920px) {
+  @media (max-height: 800px) {
+    #numbers_container > *{
+        font-size: 1.9rem;
+    }
+  }
+
+  @media (max-height: 600px) {
+    #numbers_container > *{
+        font-size: 1.65rem;
+    }
+  }
+
+  @media (max-height: 500px) {
+    #numbers_container > *{
+        font-size: 1.40rem;
+    }
+  }
+
+  @media (max-width: 530px){
     #coin_svg{
         position: fixed;
         top: auto;
-        right: 20px;
-        bottom: 20px;
-        width: 115px;
+        bottom: 25px;
+        right: 25px;
+    }
+  }
+
+  @media (max-width: 1080px){
+    #offset_container{
+        justify-content: center;
+        width: 100%;
     }
   }
