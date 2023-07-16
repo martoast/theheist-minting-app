@@ -256,7 +256,7 @@ function App(){
         setFeedback({
             visible: 'minting',
             closable: false,
-            message: `Minting your ${CONFIG.NFT_NAME}...`
+            message: `Now minting your Heist World NFT!`
         });
         setClaimingNft(true);
         blockchain.smartContract.methods
@@ -272,7 +272,7 @@ function App(){
             setFeedback({
                 visible: true,
                 closable: true,
-                message:"Sorry, something went wrong please try again later."
+                message:"Yikes! We couldn't load the smart contract data!"
             });
             setClaimingNft(false);
             })
@@ -281,7 +281,7 @@ function App(){
             setFeedback({
                 visible: true,
                 closable: true,
-                message: `WOW, the ${CONFIG.NFT_NAME} is yours! go visit Opensea.io to view it.`
+                message: `Congratulations on your new Heist World NFT, head over to OpenSea to view it now!`
             });
             setClaimingNft(false);
             dispatch(fetchData(blockchain.account));

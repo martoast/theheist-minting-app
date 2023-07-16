@@ -84,21 +84,21 @@ export const connect = () => {
           dispatch(connectFailed({
             visible: true,
             closable: true,
-            message: `Change network to ${CONFIG.NETWORK.NAME}.`
+            message: "Please connect to the Ethereum Mainnet in your wallet!"
           }));
         }
       } catch (err) {
         dispatch(connectFailed({
           visible: true,
           closable: true,
-          message: "Something went wrong."
+          message: "Oopsie daisy, something went wrong!"
         }));
       }
     } else {
       dispatch(connectFailed({
         visible: true,
         closable: true,
-        message: "Install Metamask."
+        message: "Uh-oh, looks like you don't have MetaMask installed :("
       }));
     }
   };
