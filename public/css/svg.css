@@ -8,10 +8,13 @@ html, body{
 }
 
 body{
+    width: 100%;
+    height: 100dvh;
+
     background-image: url("/assets/background.png");
     background-size: cover;
     background-position: center;
-    font-family: 'Heistish', sans-serif;
+    font-family: sans-serif;
 }
 
 #offset_container{
@@ -52,7 +55,7 @@ body{
 
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    /* object-fit: contain; */
 
     backface-visibility: hidden;
 
@@ -67,7 +70,7 @@ body{
     min-width: 0;
     min-height: 0;
 
-    object-fit: contain;
+    /* object-fit: contain; */
 }
 
 #coin_svg > *,
@@ -178,9 +181,10 @@ body{
 #coin_svg{
     position: absolute;
     top: 45%;
-    right: calc(0px - 60px);
+    right: -60px;
 
     width: 25%;
+    height: 15%;
     aspect-ratio: 1;
 
     transform-origin: center;
@@ -332,13 +336,16 @@ body{
 
     width: 80%;
     max-width: 457px;
-    height: 80%;
+    height: auto;
     max-height: 465px;
  }
 
  #feedback_container > #duck{
     width: 100%;
     height: 100%;
+    max-height: 80vh;
+
+    display: block;
 
     object-fit: contain;
  }
@@ -354,7 +361,7 @@ body{
 
     /* background: orange; */
 
-    font-size: 1.75rem;
+    font-size: clamp(1.25rem, 1.5rem, 1.75rem);
     text-transform: uppercase;
     color: white;
     font-weight: 700;
@@ -445,6 +452,13 @@ body{
     }
   }
 
+  @media (max-height: 835px) and (min-width: 540px) {
+    #coin_svg{
+        right: auto;
+        left: calc(50% + 20vh);
+    }
+  }
+
   @media (max-height: 800px) {
     #numbers_container > *{
         font-size: 1.9rem;
@@ -460,6 +474,18 @@ body{
   @media (max-height: 500px) {
     #numbers_container > *{
         font-size: 1.40rem;
+    }
+  }
+
+  @media (max-height: 425px) {
+    #numbers_container > *{
+        font-size: 1.15rem;
+    }
+  }
+
+  @media (max-height: 325px) {
+    #numbers_container > *{
+        font-size: .95rem;
     }
   }
 

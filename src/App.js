@@ -10,7 +10,7 @@ import duck from'./assets/duck.png';
 import feedbackClose from'./assets/export_plus_symbol.png';
 
 
-const mintActive = true;
+const mintActive = false;
 
 const truncate = (input, len) =>
   input.length > len ? `${input.substring(0, len)}...` : input;
