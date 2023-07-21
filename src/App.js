@@ -10,7 +10,10 @@ import duck from'./assets/duck.png';
 import feedbackClose from'./assets/export_plus_symbol.png';
 
 
-const mintActive = false;
+const mintActive = true;
+
+const truncate = (input, len) =>
+  input.length > len ? `${input.substring(0, len)}...` : input;
 
 function AccessabilityContainer(props){
     return(
@@ -81,10 +84,25 @@ class MeterContainer extends React.Component{
         let {
             toggleStickers,
             costSvgText,
-            mintRemainingText
+            mintRemainingText,
+            smartContractAddress,
+            smartContractLink,
         } = this.props;
 
         const svg = document.querySelector('#meter_svg');
+        const numbersContainer = document.querySelector('#numbers_container')
+        const windowBackground = document.querySelector('#meter_window_background')
+
+        function numberContainerResize(e){
+            const svgBounding = svg.getBoundingClientRect()
+
+            numbersContainer.style.height = svgBounding.height + 'px'
+            windowBackground.style.height = svgBounding.height + 'px'
+        }
+
+        numberContainerResize()
+
+        window.addEventListener('resize', numberContainerResize)
 
         const meterStickers = Array.from(
                 svg.querySelectorAll('.sticker')
@@ -108,7 +126,6 @@ class MeterContainer extends React.Component{
 
 
         costSvgText.current = svg.querySelector('#total_cost_svg_text')
-
         
         const plusButtonHTML = document.querySelector('#more_button_html')
         const mintButtonHTML = document.querySelector('#mint_button_html')
@@ -157,8 +174,9 @@ class FeedbackOverlay extends React.Component{
 
         this.setState({
             ...this.state,
-            visible: true,
-            message: messageObj.message
+            visible: messageObj.visible,
+            closable: messageObj.closable,
+            message: messageObj.message,
         })
 
         console.log('hi')
@@ -166,11 +184,13 @@ class FeedbackOverlay extends React.Component{
 
     state = {
         visible: false,
+        closable: true,
         message: ''
     }
 
     getMessage = () => this.state.message
     getVisible = () => this.state.visible
+    getClosable = () => this.state.closable
 
     render(){
         return(
@@ -178,7 +198,7 @@ class FeedbackOverlay extends React.Component{
                 <div id="feedback_container">
                     <img src={duck} id="duck" />
                     <p id="feedback_text">{this.getMessage()}</p>
-                    <img src={feedbackClose} id="feedback_close"  onClick={(e) => {
+                    <img src={feedbackClose} id="feedback_close"  data-closable={this.getClosable()} onClick={(e) => {
                         e.preventDefault();
                         this.setState({...this.state, visible: false})
                     }}/>
@@ -234,8 +254,9 @@ function App(){
         let totalCostWei = String(cost * mintAmount);
         let totalGasLimit = String(gasLimit * mintAmount);
         setFeedback({
-            visible: true,
-            message: `Minting your ${CONFIG.NFT_NAME}...`
+            visible: 'minting',
+            closable: false,
+            message: `Now minting your Heist World NFT!`
         });
         setClaimingNft(true);
         blockchain.smartContract.methods
@@ -250,7 +271,8 @@ function App(){
             console.log(err);
             setFeedback({
                 visible: true,
-                message:"Sorry, something went wrong please try again later."
+                closable: true,
+                message:"Yikes! We couldn't load the smart contract data!"
             });
             setClaimingNft(false);
             })
@@ -258,7 +280,8 @@ function App(){
             console.log(receipt);
             setFeedback({
                 visible: true,
-                message: `WOW, the ${CONFIG.NFT_NAME} is yours! go visit Opensea.io to view it.`
+                closable: true,
+                message: `Congratulations on your new Heist World NFT, head over to OpenSea to view it now!`
             });
             setClaimingNft(false);
             dispatch(fetchData(blockchain.account));
@@ -455,6 +478,14 @@ function App(){
         setCoinShake(false)
     }
 
+    useEffect(() => {
+        const contractLink = document.querySelector('#contract_link')
+        const contractLinkText = contractLink.querySelector('text')
+
+        contractLinkText.textContent = truncate(CONFIG.CONTRACT_ADDRESS, 15)
+        contractLink.setAttribute('href', CONFIG.SCAN_LINK)
+    })
+
     return (
         <>
             {/* <img src={background} id="background"/> */}
@@ -524,9 +555,13 @@ function App(){
 
                     mintOpen = {(!(Number(data.totalSupply) >= CONFIG.MAX_SUPPLY) && mintActive).toString()}
 
-                    mintRemainingTextValue = {`${data.totalSupply} / ${CONFIG.MAX_SUPPLY}`}
+                    mintRemainingTextValue = {`${Number(data.totalSupply).toLocaleString('en', {useGrouping:true})} / ${CONFIG.MAX_SUPPLY}`}
 
                     walletConnected = {(!(blockchain.account === "" || blockchain.smartContract === null)).toString()}
+
+                    smartContractAddress = {truncate(CONFIG.CONTRACT_ADDRESS, 15)}
+
+                    smartContractLink = {CONFIG.SCAN_LINK}
 
                     meterNumbers = {meterNumbers}
                 ></MeterContainer>
